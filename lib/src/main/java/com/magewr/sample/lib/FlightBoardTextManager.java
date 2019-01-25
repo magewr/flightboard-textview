@@ -25,6 +25,11 @@ public class FlightBoardTextManager {
     private int maxRow;
     private int maxColumn;
 
+    //For Animation
+    private boolean skipSameCharacter = false;
+    private int columnAnimationInterval;
+    private int rowAnimationInterval;
+
     private int[] realColumnIndex;
 
     //For AutoLoop
@@ -47,6 +52,10 @@ public class FlightBoardTextManager {
         private int[] blockMargin = {2, 0, 2, 0};   // default block margin
         private int[] textMargin = {0, 8, 0, 8};   // default text(string) margin
         private String[] charArray = {" ", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "-", ":", ".", "&"};
+        private boolean skipSameCharacter = false;
+        private int characterAnimationInterval = 100;
+        private int columnAnimationInterval = 10;
+        private int rowAnimationInterval = 2000;
 
         private TextSwitcherManagerBuilder(Context context) {
             this.context = context;
@@ -79,6 +88,30 @@ public class FlightBoardTextManager {
 
         public TextSwitcherManagerBuilder charList (String[] charList) {
             builder.charArray = charArray;
+
+            return builder;
+        }
+
+        public TextSwitcherManagerBuilder skipSameCharacter(boolean skipSameCharacter) {
+            builder.skipSameCharacter = skipSameCharacter;
+
+            return builder;
+        }
+
+        public TextSwitcherManagerBuilder characterAnimationInterval(int characterAnimationInterval) {
+            builder.characterAnimationInterval = characterAnimationInterval;
+
+            return builder;
+        }
+
+        public TextSwitcherManagerBuilder columnAnimationInterval(int columnAnimationInterval) {
+            builder.columnAnimationInterval = columnAnimationInterval;
+
+            return builder;
+        }
+
+        public TextSwitcherManagerBuilder rowAnimationInterval(int rowAnimationInterval) {
+            builder.rowAnimationInterval = rowAnimationInterval;
 
             return builder;
         }
@@ -118,7 +151,7 @@ public class FlightBoardTextManager {
                 for (int j = 0 ; j < column ; j++ ) {
                     AdvTextSwitcher advTextSwitcher = new AdvTextSwitcher(context, i, j, textSize);
                     advTextSwitcher.setTexts(charArray);
-                    Switcher switcher = new Switcher().attach(advTextSwitcher).setDuration(100);
+                    Switcher switcher = new Switcher().attach(advTextSwitcher).setDuration(characterAnimationInterval);
 
                     LinearLayout.LayoutParams switcherParams = new LinearLayout.LayoutParams(convertDpToPixel(context,blockSize), ViewGroup.LayoutParams.WRAP_CONTENT);
                     switcherParams.setMargins(convertDpToPixel(context, blockMargin[0]), convertDpToPixel(context, blockMargin[1]), convertDpToPixel(context, blockMargin[2]), convertDpToPixel(context, blockMargin[3]));
@@ -136,6 +169,9 @@ public class FlightBoardTextManager {
 
             manager.initRandomIndex();
             manager.realColumnIndex = new int[row];
+            manager.skipSameCharacter = skipSameCharacter;
+            manager.columnAnimationInterval = columnAnimationInterval;
+            manager.rowAnimationInterval = rowAnimationInterval;
 
             builder = null;
 
@@ -226,10 +262,10 @@ public class FlightBoardTextManager {
                     targetChar = target.substring(randomIndex, randomIndex + 1);
 
                 AdvTextSwitcher advTextSwitcherLocal = switcherList.get(row).get(randomIndex);
-//                if (targetChar.equals(" ") && advTextSwitcherLocal.getCurrentText().equals(targetChar)) {
-//
-//                }
-//                else {
+                if (skipSameCharacter && advTextSwitcherLocal.getCurrentText().equals(targetChar)) {
+
+                }
+                else {
                     Switcher switcherLocal = map.get(advTextSwitcherLocal);
 
                     final String finalTargetChar = targetChar;
@@ -263,13 +299,13 @@ public class FlightBoardTextManager {
                     });
 
                     switcherLocal.start();
-//                }
+                }
 
                 realColumnIndex[row]++;
                 if (realColumnIndex[row] == maxColumn) {
                     realColumnIndex[row] = 0;
                 } else {
-                    timerHandler.postDelayed(createSpinStartRunnable(row, target), 10);
+                    timerHandler.postDelayed(createSpinStartRunnable(row, target), columnAnimationInterval);
                 }
             }
         };
@@ -280,7 +316,7 @@ public class FlightBoardTextManager {
             if (row >= maxRow || row >= stringArray.size())
                 return;
             notifyStringChanged(row, stringArray.get(row));
-            timerHandler.postDelayed(createRowSpinStartRunnable(row + 1, stringArray), 2000);
+            timerHandler.postDelayed(createRowSpinStartRunnable(row + 1, stringArray), rowAnimationInterval);
         };
     }
 
@@ -302,7 +338,7 @@ public class FlightBoardTextManager {
         return randomIndex.get(realRowIndex).get(realColumnIndex);
     }
 
-    public static int convertDpToPixel(Context context, float dp){
+    private static int convertDpToPixel(Context context, float dp){
         return (int) (dp * ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT));
     }
 }
