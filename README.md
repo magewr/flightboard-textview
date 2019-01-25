@@ -51,3 +51,5 @@ defaultString.add("                    ");
 flightBoardTextManager.notifyAllStringChanged(defaultString);
 	
 ```
+
+Thanks to [AdvancedTextSwitcher](https://github.com/SumiMakito/AdvancedTextSwitcher)
