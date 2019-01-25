@@ -42,4 +42,12 @@ flightBoardTextManager = FlightBoardTextManager.with(this)
 	.into(linearLayout)
 	.skipSameCharacter(true)
 	.build();
+
+ArrayList<String> defaultString = new ArrayList<>();
+defaultString.add("                    ");
+defaultString.add("  FLIGHT BOARD      ");
+defaultString.add("         TEXT VIEW  ");
+defaultString.add("                    ");
+flightBoardTextManager.notifyAllStringChanged(defaultString);
+	
 ```
